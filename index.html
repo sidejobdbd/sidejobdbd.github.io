@@ -10,24 +10,22 @@
     .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
     h2 { text-align: center; margin-bottom: 20px; color: #1a1a2e; }
     
-    /* Form Style */
     .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .form-group input { flex: 1; min-width: 140px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
     .form-group button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .form-group button:hover { background: #218838; }
 
-    /* Table Style */
     .table-responsive { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
     th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
     th { background-color: #1a1a2e; color: white; }
     tr:nth-child(even) { background-color: #f9f9f9; }
     
-    /* Button & Link Style */
     .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
     .btn-delete:hover { background: #c82333; }
     a { color: #007bff; text-decoration: none; word-break: break-all; }
     a:hover { text-decoration: underline; }
+    #loading { text-align: center; display: none; margin: 10px 0; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -35,16 +33,16 @@
 <div class="container">
   <h2>Sistem Input Data GitHub Page</h2>
 
-  <!-- Form Input -->
   <form id="dataForm" class="form-group">
     <input type="number" id="no" placeholder="No (1, 2, dst)" required>
     <input type="text" id="nama" placeholder="Nama & Link Game" required>
     <input type="text" id="pembayaran" placeholder="Pembayaran" required>
     <input type="url" id="linkVideo" placeholder="Link Video (https://...)" required>
-    <button type="submit">Tambah Data</button>
+    <button type="submit" id="submitBtn">Tambah Data</button>
   </form>
 
-  <!-- Tabel Data -->
+  <div id="loading">Memuat & Memproses Data...</div>
+
   <div class="table-responsive">
     <table>
       <thead>
@@ -57,65 +55,100 @@
         </tr>
       </thead>
       <tbody id="dataTable">
-        <!-- Data akan muncul di sini -->
       </tbody>
     </table>
   </div>
 </div>
 
 <script>
+  // GANTI URL DI BAWAH DENGAN URL API DARI SHEETDB
+  const API_URL = "https://sheetdb.io/api/v1/ly0kpmonvf4ii";
+
   const form = document.getElementById('dataForm');
   const dataTable = document.getElementById('dataTable');
+  const loading = document.getElementById('loading');
 
-  // Load data dari LocalStorage saat halaman dibuka
   document.addEventListener('DOMContentLoaded', loadData);
 
+  // Ambil Data dari Google Sheets (Bisa dilihat publik)
+  function loadData() {
+    loading.style.display = 'block';
+    dataTable.innerHTML = '';
+
+    fetch(API_URL)
+      .then(response => response.json())
+      .then(data => {
+        loading.style.display = 'none';
+        data.forEach(item => renderRow(item));
+      })
+      .catch(error => {
+        loading.style.display = 'none';
+        console.error('Error:', error);
+      });
+  }
+
+  // Tambah Data ke Google Sheets
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    loading.style.display = 'block';
 
-    const item = {
-      id: Date.now(),
-      no: document.getElementById('no').value,
-      nama: document.getElementById('nama').value,
-      pembayaran: document.getElementById('pembayaran').value,
-      linkVideo: document.getElementById('linkVideo').value
+    const payload = {
+      data: [{
+        no: document.getElementById('no').value,
+        nama: document.getElementById('nama').value,
+        pembayaran: document.getElementById('pembayaran').value,
+        linkVideo: document.getElementById('linkVideo').value
+      }]
     };
 
-    saveToStorage(item);
-    renderRow(item);
-    form.reset();
+    fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(() => {
+      form.reset();
+      loadData();
+    })
+    .catch(error => {
+      loading.style.display = 'none';
+      alert('Gagal menambah data');
+      console.error(error);
+    });
   });
 
+  // Tampilkan ke Tabel HTML
   function renderRow(item) {
     const tr = document.createElement('tr');
-    tr.setAttribute('data-id', item.id);
     tr.innerHTML = `
       <td>${item.no}</td>
       <td>${item.nama}</td>
       <td>${item.pembayaran}</td>
       <td><a href="${item.linkVideo}" target="_blank" rel="noopener">Tonton Video</a></td>
-      <td><button class="btn-delete" onclick="deleteItem(${item.id})">Hapus</button></td>
+      <td><button class="btn-delete" onclick="deleteItem('${item.no}')">Hapus</button></td>
     `;
     dataTable.appendChild(tr);
   }
 
-  function saveToStorage(item) {
-    const items = JSON.parse(localStorage.getItem('dbData') || '[]');
-    items.push(item);
-    localStorage.setItem('dbData', JSON.stringify(items));
-  }
-
-  function loadData() {
-    const items = JSON.parse(localStorage.getItem('dbData') || '[]');
-    items.forEach(renderRow);
-  }
-
-  function deleteItem(id) {
-    let items = JSON.parse(localStorage.getItem('dbData') || '[]');
-    items = items.filter(item => item.id !== id);
-    localStorage.setItem('dbData', JSON.stringify(items));
+  // Hapus Data dari Google Sheets berdasarkan Nomor
+  function deleteItem(no) {
+    if(!confirm('Apakah Anda yakin ingin menghapus baris ini?')) return;
     
-    document.querySelector(`tr[data-id="${id}"]`).remove();
+    loading.style.display = 'block';
+    fetch(`${API_URL}/no/${no}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
+    })
+    .then(response => response.json())
+    .then(() => {
+      loadData();
+    })
+    .catch(error => {
+      loading.style.display = 'none';
+      alert('Gagal menghapus data');
+      console.error(error);
+    });
   }
 </script>
 
