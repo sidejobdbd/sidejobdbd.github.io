@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Game & Pembayaran</title>
+  <title>Game Data & Payment</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #333; }
@@ -24,18 +24,18 @@
 <body>
 
 <div class="container">
-  <h2>Data Game & Pembayaran</h2>
+  <h2>Game Data & Payment</h2>
 
-  <div id="loading">Memuat Data...</div>
+  <div id="loading">Loading Data...</div>
 
   <div class="table-responsive">
     <table>
       <thead>
         <tr>
-          <th>Tanggal</th>
-          <th>Nama & Link Game</th>
-          <th>Pembayaran</th>
-          <th>Link Video</th>
+          <th>Date</th>
+          <th>Name & Game Link</th>
+          <th>Payment</th>
+          <th>Video Link</th>
         </tr>
       </thead>
       <tbody id="dataTable"></tbody>
@@ -44,7 +44,6 @@
 </div>
 
 <script>
-  // GANTI URL DI BAWAH DENGAN URL API DARI SHEETDB
   const API_URL = "https://sheetdb.io/api/v1/ly0kpmonvf4ii";
 
   const dataTable = document.getElementById('dataTable');
@@ -70,13 +69,17 @@
 
   function renderRow(item) {
     const tr = document.createElement('tr');
-    const link = item['link video'] || item.linkVideo || '';
+    // Memeriksa variabel bahasa Inggris serta backward-compatibility dengan kunci lama
+    const date = item.date || item.tanggal || '';
+    const name = item.name || item.nama || '';
+    const payment = item.payment || item.pembayaran || '';
+    const link = item['video link'] || item.videoLink || item['link video'] || item.linkVideo || '';
     
     tr.innerHTML = `
-      <td>${item.tanggal || ''}</td>
-      <td>${item.nama || ''}</td>
-      <td>${item.pembayaran || ''}</td>
-      <td>${link ? `<a href="${link}" target="_blank" rel="noopener">Tonton Video</a>` : '-'}</td>
+      <td>${date}</td>
+      <td>${name}</td>
+      <td>${payment}</td>
+      <td>${link ? `<a href="${link}" target="_blank" rel="noopener">Watch Video</a>` : '-'}</td>
     `;
     dataTable.appendChild(tr);
   }
