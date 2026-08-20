@@ -34,7 +34,7 @@
   <h2>Sistem Input Data GitHub Page</h2>
 
   <form id="dataForm" class="form-group">
-    <input type="number" id="no" placeholder="No (1, 2, dst)" required>
+    <input type="date" id="tanggal" required>
     <input type="text" id="nama" placeholder="Nama & Link Game" required>
     <input type="text" id="pembayaran" placeholder="Pembayaran" required>
     <input type="url" id="linkVideo" placeholder="Link Video (https://...)" required>
@@ -47,7 +47,7 @@
     <table>
       <thead>
         <tr>
-          <th>No</th>
+          <th>Tanggal</th>
           <th>Nama & Link Game</th>
           <th>Pembayaran</th>
           <th>Link Video</th>
@@ -62,7 +62,7 @@
 
 <script>
   // GANTI URL DI BAWAH DENGAN URL API DARI SHEETDB
-  const API_URL = "https://sheetdb.io/api/v1/ly0kpmonvf4ii";
+  const API_URL = "https://sheetdb.io/api/v1/KODE_API_ANDA";
 
   const form = document.getElementById('dataForm');
   const dataTable = document.getElementById('dataTable');
@@ -70,7 +70,7 @@
 
   document.addEventListener('DOMContentLoaded', loadData);
 
-  // Ambil Data dari Google Sheets (Bisa dilihat publik)
+  // Ambil Data dari Google Sheets
   function loadData() {
     loading.style.display = 'block';
     dataTable.innerHTML = '';
@@ -94,10 +94,10 @@
 
     const payload = {
       data: [{
-        no: document.getElementById('no').value,
+        tanggal: document.getElementById('tanggal').value,
         nama: document.getElementById('nama').value,
         pembayaran: document.getElementById('pembayaran').value,
-        linkVideo: document.getElementById('linkVideo').value
+        "link video": document.getElementById('linkVideo').value
       }]
     };
 
@@ -121,22 +121,25 @@
   // Tampilkan ke Tabel HTML
   function renderRow(item) {
     const tr = document.createElement('tr');
+    // Menyesuaikan kunci objek 'link video' yang ada spasi sesuai gambar kolom D
+    const link = item['link video'] || item.linkVideo || '';
+    
     tr.innerHTML = `
-      <td>${item.no}</td>
-      <td>${item.nama}</td>
-      <td>${item.pembayaran}</td>
-      <td><a href="${item.linkVideo}" target="_blank" rel="noopener">Tonton Video</a></td>
-      <td><button class="btn-delete" onclick="deleteItem('${item.no}')">Hapus</button></td>
+      <td>${item.tanggal || ''}</td>
+      <td>${item.nama || ''}</td>
+      <td>${item.pembayaran || ''}</td>
+      <td><a href="${link}" target="_blank" rel="noopener">Tonton Video</a></td>
+      <td><button class="btn-delete" onclick="deleteItem('${item.tanggal}')">Hapus</button></td>
     `;
     dataTable.appendChild(tr);
   }
 
-  // Hapus Data dari Google Sheets berdasarkan Nomor
-  function deleteItem(no) {
-    if(!confirm('Apakah Anda yakin ingin menghapus baris ini?')) return;
+  // Hapus Data dari Google Sheets berdasarkan Tanggal
+  function deleteItem(tanggal) {
+    if(!confirm('Apakah Anda yakin ingin menghapus data tanggal ini?')) return;
     
     loading.style.display = 'block';
-    fetch(`${API_URL}/no/${no}`, {
+    fetch(`${API_URL}/tanggal/${tanggal}`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' }
     })
