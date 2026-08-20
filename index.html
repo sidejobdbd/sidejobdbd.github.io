@@ -3,99 +3,121 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sidejob DBD - Portal Resmi</title>
-  <meta name="description" content="Halaman resmi Sidejob DBD di GitHub Pages.">
-
-  <!-- Meta Open Graph (Tampilan saat tautan dibagikan) -->
-  <meta property="og:title" content="Sidejob DBD">
-  <meta property="og:description" content="Portal resmi Sidejob DBD.">
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="https://sidejobdbd.github.io/">
-
+  <title>Data Game & Pembayaran</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      color: #333;
-      background-color: #f8f9fa;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    header {
-      background-color: #1a1a2e;
-      color: #ffffff;
-      padding: 2rem 1rem;
-      text-align: center;
-    }
-    header h1 {
-      font-size: 2.2rem;
-      margin-bottom: 0.5rem;
-    }
-    main {
-      flex: 1;
-      max-width: 800px;
-      margin: 2rem auto;
-      padding: 0 1rem;
-      width: 100%;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 8px;
-      padding: 2rem;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-      margin-bottom: 1.5rem;
-    }
-    .card h2 {
-      color: #1a1a2e;
-      margin-bottom: 1rem;
-    }
-    .btn {
-      display: inline-block;
-      background-color: #0f3460;
-      color: #ffffff;
-      padding: 0.6rem 1.2rem;
-      text-decoration: none;
-      border-radius: 5px;
-      margin-top: 1rem;
-      transition: background-color 0.2s ease;
-    }
-    .btn:hover {
-      background-color: #e94560;
-    }
-    footer {
-      background-color: #eef2f5;
-      text-align: center;
-      padding: 1rem;
-      font-size: 0.9rem;
-      color: #666;
-      border-top: 1px solid #e1e8ed;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #333; }
+    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; margin-bottom: 20px; color: #1a1a2e; }
+    
+    /* Form Style */
+    .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .form-group input { flex: 1; min-width: 140px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+    .form-group button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .form-group button:hover { background: #218838; }
+
+    /* Table Style */
+    .table-responsive { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+    th { background-color: #1a1a2e; color: white; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    
+    /* Button & Link Style */
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+    .btn-delete:hover { background: #c82333; }
+    a { color: #007bff; text-decoration: none; word-break: break-all; }
+    a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
 
-  <header>
-    <h1>Sidejob DBD</h1>
-    <p>Selamat datang di repositori utama sidejobdbd.github.io</p>
-  </header>
+<div class="container">
+  <h2>Sistem Input Data GitHub Page</h2>
 
-  <main>
-    <section class="card">
-      <h2>Tentang Proyek</h2>
-      <p>Ini adalah halaman utama untuk situs web Sidejob DBD yang di-host menggunakan GitHub Pages.</p>
-      <a href="https://github.com/Changli666/sidejobdbd.github.io" class="btn" target="_blank" rel="noopener">Lihat Repositori GitHub</a>
-    </section>
-  </main>
+  <!-- Form Input -->
+  <form id="dataForm" class="form-group">
+    <input type="number" id="no" placeholder="No (1, 2, dst)" required>
+    <input type="text" id="nama" placeholder="Nama & Link Game" required>
+    <input type="text" id="pembayaran" placeholder="Pembayaran" required>
+    <input type="url" id="linkVideo" placeholder="Link Video (https://...)" required>
+    <button type="submit">Tambah Data</button>
+  </form>
 
-  <footer>
-    <p>&copy; Sidejob DBD. Dikelola melalui GitHub Pages.</p>
-  </footer>
+  <!-- Tabel Data -->
+  <div class="table-responsive">
+    <table>
+      <thead>
+        <tr>
+          <th>No</th>
+          <th>Nama & Link Game</th>
+          <th>Pembayaran</th>
+          <th>Link Video</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="dataTable">
+        <!-- Data akan muncul di sini -->
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById('dataForm');
+  const dataTable = document.getElementById('dataTable');
+
+  // Load data dari LocalStorage saat halaman dibuka
+  document.addEventListener('DOMContentLoaded', loadData);
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const item = {
+      id: Date.now(),
+      no: document.getElementById('no').value,
+      nama: document.getElementById('nama').value,
+      pembayaran: document.getElementById('pembayaran').value,
+      linkVideo: document.getElementById('linkVideo').value
+    };
+
+    saveToStorage(item);
+    renderRow(item);
+    form.reset();
+  });
+
+  function renderRow(item) {
+    const tr = document.createElement('tr');
+    tr.setAttribute('data-id', item.id);
+    tr.innerHTML = `
+      <td>${item.no}</td>
+      <td>${item.nama}</td>
+      <td>${item.pembayaran}</td>
+      <td><a href="${item.linkVideo}" target="_blank" rel="noopener">Tonton Video</a></td>
+      <td><button class="btn-delete" onclick="deleteItem(${item.id})">Hapus</button></td>
+    `;
+    dataTable.appendChild(tr);
+  }
+
+  function saveToStorage(item) {
+    const items = JSON.parse(localStorage.getItem('dbData') || '[]');
+    items.push(item);
+    localStorage.setItem('dbData', JSON.stringify(items));
+  }
+
+  function loadData() {
+    const items = JSON.parse(localStorage.getItem('dbData') || '[]');
+    items.forEach(renderRow);
+  }
+
+  function deleteItem(id) {
+    let items = JSON.parse(localStorage.getItem('dbData') || '[]');
+    items = items.filter(item => item.id !== id);
+    localStorage.setItem('dbData', JSON.stringify(items));
+    
+    document.querySelector(`tr[data-id="${id}"]`).remove();
+  }
+</script>
 
 </body>
 </html>
