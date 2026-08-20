@@ -8,12 +8,12 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #333; }
     .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    h2 { text-align: center; margin-bottom: 20px; color: #1a1a2e; }
+    .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    h2 { color: #1a1a2e; }
     
-    .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .form-group { display: none; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; background: #eef2f7; padding: 15px; border-radius: 6px; }
     .form-group input { flex: 1; min-width: 140px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
     .form-group button { padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .form-group button:hover { background: #218838; }
 
     .table-responsive { overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; margin-top: 10px; }
@@ -21,27 +21,30 @@
     th { background-color: #1a1a2e; color: white; }
     tr:nth-child(even) { background-color: #f9f9f9; }
     
-    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-    .btn-delete:hover { background: #c82333; }
+    .btn-delete { background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; display: none; }
+    .btn-admin { background: #0f3460; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
     a { color: #007bff; text-decoration: none; word-break: break-all; }
-    a:hover { text-decoration: underline; }
     #loading { text-align: center; display: none; margin: 10px 0; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <h2>Sistem Input Data GitHub Page</h2>
+  <div class="header-flex">
+    <h2>Sistem Input Data GitHub Page</h2>
+    <button id="adminBtn" class="btn-admin" onclick="toggleAdmin()">Login Owner</button>
+  </div>
 
+  <!-- Form hanya muncul setelah Login -->
   <form id="dataForm" class="form-group">
     <input type="date" id="tanggal" required>
     <input type="text" id="nama" placeholder="Nama & Link Game" required>
     <input type="text" id="pembayaran" placeholder="Pembayaran" required>
     <input type="url" id="linkVideo" placeholder="Link Video (https://...)" required>
-    <button type="submit" id="submitBtn">Tambah Data</button>
+    <button type="submit">Tambah Data</button>
   </form>
 
-  <div id="loading">Memuat & Memproses Data...</div>
+  <div id="loading">Memuat Data...</div>
 
   <div class="table-responsive">
     <table>
@@ -51,45 +54,78 @@
           <th>Nama & Link Game</th>
           <th>Pembayaran</th>
           <th>Link Video</th>
-          <th>Aksi</th>
+          <th id="aksiHeader" style="display: none;">Aksi</th>
         </tr>
       </thead>
-      <tbody id="dataTable">
-      </tbody>
+      <tbody id="dataTable"></tbody>
     </table>
   </div>
 </div>
 
 <script>
-  // GANTI URL DI BAWAH DENGAN URL API DARI SHEETDB
-  const API_URL = "https://sheetdb.io/api/v1/ly0kpmonvf4ii";
+  const API_URL = "https://sheetdb.io/api/v1/ly0kpmonvf4ii"; // GANTI API KEY ANDA
+  const PASSWORD_ADMIN = "12345"; // GANTI KATA SANDI ANDA DI SINI
 
+  let isAdmin = false;
   const form = document.getElementById('dataForm');
   const dataTable = document.getElementById('dataTable');
   const loading = document.getElementById('loading');
 
   document.addEventListener('DOMContentLoaded', loadData);
 
-  // Ambil Data dari Google Sheets
+  function toggleAdmin() {
+    if(!isAdmin) {
+      const pass = prompt("Masukkan Kata Sandi Owner:");
+      if(pass === PASSWORD_ADMIN) {
+        isAdmin = true;
+        document.getElementById('adminBtn').innerText = "Logout";
+        form.style.display = 'flex';
+        document.getElementById('aksiHeader').style.display = 'table-cell';
+        loadData();
+      } else if(pass !== null) {
+        alert("Sandi Salah!");
+      }
+    } else {
+      isAdmin = false;
+      document.getElementById('adminBtn').innerText = "Login Owner";
+      form.style.display = 'none';
+      document.getElementById('aksiHeader').style.display = 'none';
+      loadData();
+    }
+  }
+
   function loadData() {
     loading.style.display = 'block';
     dataTable.innerHTML = '';
 
     fetch(API_URL)
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         loading.style.display = 'none';
         data.forEach(item => renderRow(item));
-      })
-      .catch(error => {
-        loading.style.display = 'none';
-        console.error('Error:', error);
       });
   }
 
-  // Tambah Data ke Google Sheets
+  function renderRow(item) {
+    const tr = document.createElement('tr');
+    const link = item['link video'] || item.linkVideo || '';
+    const displayAksi = isAdmin ? 'table-cell' : 'none';
+    
+    tr.innerHTML = `
+      <td>${item.tanggal || ''}</td>
+      <td>${item.nama || ''}</td>
+      <td>${item.pembayaran || ''}</td>
+      <td><a href="${link}" target="_blank">Tonton Video</a></td>
+      <td style="display: ${displayAksi};">
+        <button class="btn-delete" style="display: inline-block;" onclick="deleteItem('${item.tanggal}')">Hapus</button>
+      </td>
+    `;
+    dataTable.appendChild(tr);
+  }
+
   form.addEventListener('submit', function(e) {
     e.preventDefault();
+    if(!isAdmin) return;
     loading.style.display = 'block';
 
     const payload = {
@@ -106,52 +142,14 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
-    .then(response => response.json())
-    .then(() => {
-      form.reset();
-      loadData();
-    })
-    .catch(error => {
-      loading.style.display = 'none';
-      alert('Gagal menambah data');
-      console.error(error);
-    });
+    .then(() => { form.reset(); loadData(); });
   });
 
-  // Tampilkan ke Tabel HTML
-  function renderRow(item) {
-    const tr = document.createElement('tr');
-    // Menyesuaikan kunci objek 'link video' yang ada spasi sesuai gambar kolom D
-    const link = item['link video'] || item.linkVideo || '';
-    
-    tr.innerHTML = `
-      <td>${item.tanggal || ''}</td>
-      <td>${item.nama || ''}</td>
-      <td>${item.pembayaran || ''}</td>
-      <td><a href="${link}" target="_blank" rel="noopener">Tonton Video</a></td>
-      <td><button class="btn-delete" onclick="deleteItem('${item.tanggal}')">Hapus</button></td>
-    `;
-    dataTable.appendChild(tr);
-  }
-
-  // Hapus Data dari Google Sheets berdasarkan Tanggal
   function deleteItem(tanggal) {
-    if(!confirm('Apakah Anda yakin ingin menghapus data tanggal ini?')) return;
-    
+    if(!isAdmin || !confirm('Hapus baris ini?')) return;
     loading.style.display = 'block';
-    fetch(`${API_URL}/tanggal/${tanggal}`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' }
-    })
-    .then(response => response.json())
-    .then(() => {
-      loadData();
-    })
-    .catch(error => {
-      loading.style.display = 'none';
-      alert('Gagal menghapus data');
-      console.error(error);
-    });
+    fetch(`${API_URL}/tanggal/${tanggal}`, { method: 'DELETE' })
+      .then(() => loadData());
   }
 </script>
 
