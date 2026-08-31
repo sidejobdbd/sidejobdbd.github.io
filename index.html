@@ -7,18 +7,33 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: Arial, sans-serif; background: #f4f6f9; padding: 20px; color: #333; }
-    .container { max-width: 900px; margin: 0 auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
+    /* Memperluas container utama agar tabel lebih leluasa */
+    .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
     h2 { text-align: center; margin-bottom: 20px; color: #1a1a2e; }
 
     .table-responsive { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-    th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-    th { background-color: #1a1a2e; color: white; }
-    tr:nth-child(even) { background-color: #f9f9f9; }
     
-    a { color: #007bff; text-decoration: none; word-break: break-all; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
+    
+    th, td { border: 1px solid #ddd; padding: 14px 16px; text-align: left; vertical-align: middle; word-wrap: break-word; }
+    
+    /* Mengatur lebar kolom secara proporsional agar lebih rapi dan luas */
+    th:nth-child(1), td:nth-child(1) { width: 12%; text-align: center; } /* Date */
+    th:nth-child(2), td:nth-child(2) { width: 43%; } /* Name & Game Link */
+    th:nth-child(3), td:nth-child(3) { width: 30%; } /* Payment */
+    th:nth-child(4), td:nth-child(4) { width: 15%; text-align: center; } /* Video Link */
+
+    th { background-color: #1a1a2e; color: white; font-size: 14px; letter-spacing: 0.5px; }
+    td { font-size: 14px; line-height: 1.5; }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+    tr:hover { background-color: #f1f4f9; }
+    
+    a { color: #007bff; text-decoration: none; font-weight: 500; }
     a:hover { text-decoration: underline; }
-    #loading { text-align: center; display: none; margin: 10px 0; font-weight: bold; }
+    
+    #loading { text-align: center; display: none; margin: 15px 0; font-weight: bold; color: #555; }
   </style>
 </head>
 <body>
@@ -69,17 +84,16 @@
 
   function renderRow(item) {
     const tr = document.createElement('tr');
-    // Memeriksa variabel bahasa Inggris serta backward-compatibility dengan kunci lama
     const date = item.date || item.tanggal || '';
     const name = item.name || item.nama || '';
     const payment = item.payment || item.pembayaran || '';
     const link = item['video link'] || item.videoLink || item['link video'] || item.linkVideo || '';
     
     tr.innerHTML = `
-      <td>${date}</td>
+      <td style="text-align: center;">${date}</td>
       <td>${name}</td>
       <td>${payment}</td>
-      <td>${link ? `<a href="${link}" target="_blank" rel="noopener">Watch Video</a>` : '-'}</td>
+      <td style="text-align: center;">${link ? `<a href="${link}" target="_blank" rel="noopener">Watch Video</a>` : '-'}</td>
     `;
     dataTable.appendChild(tr);
   }
